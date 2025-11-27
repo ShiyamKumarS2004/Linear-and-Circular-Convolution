@@ -11,101 +11,110 @@ PC installed with SCILAB.
 ```
 clc;
 clear;
-
-// Input sequences
-x = [1,2,3,0];
-h = [4,5,6,0];
-
-L = length(x);
-M = length(h);
-N = L + M - 1;
-y = zeros(1, N);
-
-// Convolution
-for n = 0:N-1
-    for k = 0:L-1
-        if (n-k >= 0 & n-k < M) then
-            y(n+1) = y(n+1) + x(k+1) * h(n-k+1);
-        end
-    end
+// Input signal x[n] and impulse response h[n]
+x = [1 1 1 1];
+h = [1 2 3 4];
+m = length(x);
+n = length(h);
+// Time axes for input and impulse response
+a = 0:1:m-1;
+b = 0:1:n-1;
+// Plot input signal x[n]
+subplot(3,1,1);
+plot2d3(a, x);
+xlabel('Time');
+ylabel('Amplitude');
+title('Input Signal x[n]');
+// Plot impulse response h[n]
+subplot(3,1,2);
+plot2d3(b, h);
+xlabel('Time');
+ylabel('Amplitude');
+title('Impulse Response h[n]');
+// Perform convolution using direct formula method
+L = m + n - 1; // Length of output signal
+y = zeros(1, L); // Initialize output
+for i = 1:L
+ conv_sum = 0;
+ for j = 1:i
+ if (j <= m) & ((i - j + 1) <= n) then
+ conv_sum = conv_sum + x(j) * h(i - j + 1);
+ end
+ end
+ y(i) = conv_sum;
 end
-
-// Display result
-disp("Linear Convolution:");
-disp(y);
-
-// Plot (stem style)
-n = 0:N-1;
-clf();
-plot2d3(n, y);     // Stem plot
-xtitle("Linear Convolution Output", "n", "y[n]");
+disp(y, 'Convolution Sum using Direct Formula Method =');
+// Plot output signal y[n]
+subplot(3,1,3);
+c = 0:1:L-1; // Time axis for output
+plot2d3(c, y);
+xlabel('Time');
+ylabel('Amplitude');
+title('Output Signal y[n] = x[n] * h[n]');
 ```
 
 ## PROGRAM (Circular Convolution): 
 ```
 clc;
 clear;
-
-// Input sequences
-x = [1 2 2 1];
-h = [1 2 3 1];
-
-// Length for circular convolution (take max length)
-N = max(length(x), length(h));
-
-// Zero padding if needed
-x = [x, zeros(1, N-length(x))];
-h = [h, zeros(1, N-length(h))];
-
-disp("Zero-padded input:");
-disp(x);
-disp("Zero-padded impulse:");
-disp(h);
-
-// ---- Circular convolution using modulo ----
-y = zeros(1, N);
-
-for n = 1:N
-    for k = 1:N
-        j = pmodulo(n-k, N) + 1;   // pmodulo avoids negative indices
-        y(n) = y(n) + x(k) * h(j);
-    end
-end
-
-disp("Circular convolution result:");
-disp(y);
-
-// ---- Plot results ----
+// Input signal x[n]
+x = [1 1 1 1];
+n1 = 0 : length(x) - 1;
 subplot(3,1,1);
-plot2d3(0:N-1, x);
-title("Input sequence x[n]");
-xlabel("n"); ylabel("Amplitude");
-
+plot2d3(n1, x);
+xlabel('Time');
+ylabel('Amplitude');
+title('Input Sequence x[n]');
+// Impulse response h[n]
+h = [1 2 3];
+n2 = 0 : length(h) - 1;
 subplot(3,1,2);
-plot2d3(0:N-1, h);
-title("Impulse response h[n]");
-xlabel("n"); ylabel("Amplitude");
-
+plot2d3(n2, h);
+xlabel('Time');
+ylabel('Amplitude');
+title('Impulse Sequence h[n]');
+// Zero-padding to make lengths equal
+N1 = length(x);
+N2 = length(h);
+N = max(N1, N2);
+N3 = N1 - N2;
+if N3 > 0 then
+ h = [h, zeros(1, N3)];
+else
+ x = [x, zeros(1, abs(N3))];
+end
+disp(x, "Padded x[n] = ");
+disp(h, "Padded h[n] = ");
+// Circular convolution computation
+y = zeros(1, N); // Initialize output
+for n = 1:N
+ for i = 1:N
+ j = modulo(n - i, N);
+ if j < 0 then
+ j = j + N;
+ end
+ y(n) = y(n) + x(i) * h(j + 1); // +1 because Scilab is 1-indexed
+ end
+end
+disp(y, "Circular Convolution y[n] = ");
+// Plot circular convolution result
+n = 0 : N - 1;
 subplot(3,1,3);
-plot2d3(0:N-1, y);
-title("Circular Convolution y[n]");
-xlabel("n"); ylabel("Amplitude");
+plot2d3(n, y);
+xlabel('Time');
+ylabel('Amplitude');
+title('Circular Convolution Result y[n]'); 
+
 ```
 
 ## OUTPUT (Linear Convolution):
 
-<img width="1919" height="1079" alt="1" src="https://github.com/user-attachments/assets/35a2d5e6-f946-4876-8ac5-74750b4cf6d3" />
-
-<img width="1918" height="1078" alt="2" src="https://github.com/user-attachments/assets/192d7743-70cd-4592-97ec-dee9e11e4132" />
-
+<img width="756" height="579" alt="image" src="https://github.com/user-attachments/assets/acc3c8fe-b3f9-423a-93c9-6853f126d486" />
 
 
 ## OUTPUT (Circular Convolution):
 
-<img width="1919" height="1079" alt="3" src="https://github.com/user-attachments/assets/64c12af6-a632-4eff-986c-be2ba55ae54b" />
-
-<img width="1918" height="1078" alt="4" src="https://github.com/user-attachments/assets/bebd6d0b-9cf3-405d-a433-97f4b7163721" />
-
+<img width="1718" height="872" alt="image" src="https://github.com/user-attachments/assets/fa5dbf95-8b7d-4f15-b807-340317076111" />
 
 ## RESULT:
 Thus,the Linear and Circular Convolution is verified
